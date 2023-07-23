@@ -25,5 +25,5 @@
 </p>
 
 <h1>Updates</h1>
-<b>2023-07-unknown: v1.0</b>
+<b>2023-07-23: v1.0.0</b>
 <p>Initial Release</p>
