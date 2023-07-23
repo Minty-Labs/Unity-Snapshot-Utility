@@ -1,4 +1,5 @@
 <h1>Unity Snapshot Utility</h1>
+<a title="Crowdin" target="_blank" href="https://crowdin.com/project/unity-snapshot-utility"><img src="https://badges.crowdin.net/unity-snapshot-utility/localized.svg"></a>
 <p>Created back in late 2018, this is an updated version for using the unity (main) camera to save it's view as an image. From there, you can do whatever you want.</p>
 
 <h1>Download</h1>
