@@ -25,10 +25,9 @@ public class SnapshotUtility : EditorWindow {
     private int _standardResSelected;
     private readonly string[] _standardResOptions = new string[6] { "480p", "720p", "1080p", "1440p (2K)", "2160p (4K)", "4320p (8K)" };
 
-    private int _vrchatResSelected, _chiloutvrResSelected;
-    private readonly string[] _gameResOptions = new string[5] { "1x", "2x", "4x", "8x", "16x" };
+    private int _resolutionMultiplier = 1;
 
-    private int _height, _width;
+    private int _height = 1080, _width = 1920;
     private bool _isTransparent, _openFileDirectory, _openInDefaultImageViewer;
     
     private static string _japaneseContributors, _koreanContributors, _russianContributors;
@@ -161,6 +160,7 @@ public class SnapshotUtility : EditorWindow {
             _resolutionSelected = EditorGUILayout.Popup(LanguageModel.ResolutionType(_languageSelected), _resolutionSelected, _resolutionOptions);
             switch (_resolutionSelected) {
                 case 0:
+                    _resolutionMultiplier = 1;
                     EditorGUILayout.LabelField(LanguageModel.SetOwn(_languageSelected));
                     _width = EditorGUILayout.IntField(LanguageModel.Width(_languageSelected), _width);
                     _height = EditorGUILayout.IntField(LanguageModel.Height(_languageSelected), _height);
@@ -170,6 +170,7 @@ public class SnapshotUtility : EditorWindow {
                     }
                     break;
                 case 1:
+                    _resolutionMultiplier = 1;
                     _standardResSelected = EditorGUILayout.Popup(LanguageModel.ResPresets(_languageSelected), _standardResSelected, _standardResOptions);
                     switch (_standardResSelected) {
                         case 0: // 480p
@@ -198,63 +199,27 @@ public class SnapshotUtility : EditorWindow {
                             break;
                     }
                     break;
-                case 2:
-                    _vrchatResSelected = EditorGUILayout.Popup(LanguageModel.ResPresets(_languageSelected), _vrchatResSelected, _gameResOptions);
-                    switch (_vrchatResSelected) {
-                        case 0: // 1x
-                            _width = 1200;
-                            _height = 900;
-                            break;
-                        case 1: // 2x
-                            _width = 2400;
-                            _height = 1800;
-                            break;
-                        case 2: // 4x
-                            _width = 4800;
-                            _height = 3600;
-                            break;
-                        case 3: // 8x
-                            _width = 9600;
-                            _height = 7200;
-                            EditorGUILayout.HelpBox(LanguageModel._8xWarning(_languageSelected), MessageType.Warning);
-                            break;
-                        case 4: // 16x
-                            _width = 19200;
-                            _height = 14400;
-                            EditorGUILayout.HelpBox(LanguageModel._16xWarning(_languageSelected), MessageType.Warning);
-                            break;
-                    }
+                case 2: // VRChat
+                    _width = 1200;
+                    _height = 900;
                     break;
-                case 3:
-                    _chiloutvrResSelected = EditorGUILayout.Popup(LanguageModel.ResPresets(_languageSelected), _chiloutvrResSelected, _gameResOptions);
-                    switch (_chiloutvrResSelected) {
-                        case 0: // 1x
-                            _width = 512;
-                            _height = 512;
-                            break;
-                        case 1: // 2x
-                            _width = 1024;
-                            _height = 1024;
-                            break;
-                        case 2: // 4x
-                            _width = 2048;
-                            _height = 2048;
-                            break;
-                        case 3: // 8x
-                            _width = 4096;
-                            _height = 4096;
-                            break;
-                        case 4: // 16x
-                            _width = 8192;
-                            _height = 8192;
-                            break;
-                    }
+                case 3: // ChilloutVR
+                    _width = 512;
+                    _height = 512;
                     break;
             }
+            
+            EditorGUI.EndChangeCheck();
 
             if (_resolutionSelected != 0) {
-                _width = EditorGUILayout.IntField(LanguageModel.Width(_languageSelected), _width);
-                _height = EditorGUILayout.IntField(LanguageModel.Height(_languageSelected), _height);
+                _width = EditorGUILayout.IntField(LanguageModel.Width(_languageSelected), _width) * _resolutionMultiplier;
+                _height = EditorGUILayout.IntField(LanguageModel.Height(_languageSelected), _height) * _resolutionMultiplier;
+            }
+
+            if (_resolutionSelected == 2 || _resolutionSelected == 3) {
+                EditorGUILayout.BeginHorizontal();
+                _resolutionMultiplier = EditorGUILayout.IntSlider(label: LanguageModel.Multiplier(_languageSelected), _resolutionMultiplier, 1, 16);
+                EditorGUILayout.EndHorizontal();
             }
 
             if (GUILayout.Button(LanguageModel.ResetValues(_languageSelected))) {
@@ -286,7 +251,6 @@ public class SnapshotUtility : EditorWindow {
                 File.WriteAllText(savedValueFile.FullName, sb.ToString());
                 Debug.Log(LogPrefix + "Saved values to file");
             }
-            EditorGUI.EndChangeCheck();
 
             EditorGUILayout.Space(10);
             EditorGUILayout.LabelField($"<size=15><b>{LanguageModel.HowToUse(_languageSelected)}</b></size>");
@@ -298,18 +262,13 @@ public class SnapshotUtility : EditorWindow {
                                     $"{(_openInDefaultImageViewer ? $"\n  5b. {LanguageModel.BoxImageViewer(_languageSelected)}" : "")}", MessageType.Info);
             
             EditorGUILayout.Space(10);
+            EditorGUILayout.LabelField($"<size=15>{LanguageModel.ImageResolutionOutcome(_languageSelected)} {_width}x{_height}</size>");
+            if (_width > 11999 || _height > 11999) {
+                EditorGUILayout.HelpBox(LanguageModel.HighResWarning(_languageSelected), MessageType.Warning);
+            }
             var playModeButtons = new GUIStyle(GUI.skin.button) { fixedWidth = 150f, fixedHeight = 30f };
-            if (!EditorApplication.isPlaying) {
-                EditorGUILayout.HelpBox(LanguageModel.WoahThereError(_languageSelected), MessageType.Error);
-                EditorGUILayout.BeginHorizontal();
-                GUILayout.FlexibleSpace();
-                if (GUILayout.Button(LanguageModel.EnterPlayMode(_languageSelected), playModeButtons)) 
-                    EditorApplication.EnterPlaymode();
-            }
-            else {
-                EditorGUILayout.BeginHorizontal();
-                GUILayout.FlexibleSpace();
-            }
+            EditorGUILayout.BeginHorizontal();
+            GUILayout.FlexibleSpace();
             
             GUI.backgroundColor = new Color32(0, 0, 255, 255);
             if (GUILayout.Button(LanguageModel.TakeSnapshotButton(_languageSelected), playModeButtons)) {
@@ -331,13 +290,6 @@ public class SnapshotUtility : EditorWindow {
                     Application.OpenURL("file://" + dInfo.FullName + "\\" + filename);
                     Debug.Log(LogPrefix + $"Opening \"{filename}\"");
                 }
-            }
-
-            if (Application.isPlaying) {
-                GUILayout.FlexibleSpace();
-                GUI.backgroundColor = new Color32(255, 0, 0, 255);
-                if (GUILayout.Button(LanguageModel.ExitPlayMode(_languageSelected), playModeButtons)) 
-                    EditorApplication.ExitPlaymode();
             }
             GUILayout.FlexibleSpace();
             EditorGUILayout.EndHorizontal();
