@@ -32,6 +32,9 @@ public class SnapshotUtility : EditorWindow {
     
     private static string _japaneseContributors, _koreanContributors, _russianContributors;
 
+    private static Camera _camera;
+    private string _cameraNameFromScene;
+
     [MenuItem("Tools/Minty Labs/Snapshot Utility")]
     private static void ShowWindow() {
         CheckForUpdate();
@@ -40,6 +43,14 @@ public class SnapshotUtility : EditorWindow {
         eWindow.minSize = new Vector2(500, 550);
         eWindow.autoRepaintOnSceneChange = true;
         eWindow.Show();
+
+        try {
+            if (_camera == null)
+                _camera = GameObject.Find("Main Camera")?.GetComponent<Camera>();
+        }
+        catch {
+            Debug.LogWarning(LogPrefix + "Could not find Main Camera in scene. Skipping...");
+        }
     }
 
     private static void GetContributors() {
@@ -115,6 +126,13 @@ public class SnapshotUtility : EditorWindow {
                 Debug.Log(LogPrefix + "Loaded Saved Values" + date[1].TrimStart(' ') + ":" + date[2] + ":" + date[3]);
             }
             EditorGUILayout.EndHorizontal();
+            
+            EditorGUILayout.Space(10);
+            EditorGUILayout.BeginHorizontal();
+            EditorGUILayout.LabelField(LanguageModel.SelectCamera(_languageSelected));
+            _camera = EditorGUILayout.ObjectField(_camera, typeof(Camera), true, null) as Camera;
+            EditorGUILayout.EndHorizontal();
+            _cameraNameFromScene = _camera == null ? "null" : _camera.gameObject.name;
             
             _isTransparent = EditorGUILayout.ToggleLeft(LanguageModel.HideSkybox(_languageSelected), _isTransparent);
             var typeRect = GUILayoutUtility.GetLastRect();
@@ -280,8 +298,8 @@ public class SnapshotUtility : EditorWindow {
             }
             
             GUI.backgroundColor = new Color32(0, 0, 255, 255);
-            if (EditorApplication.isPlaying && GUILayout.Button(LanguageModel.TakeSnapshotButton(_languageSelected), playModeButtons)) {
-                var bytes = CaptureSnapshot(_isTransparent, _width, _height);
+            if (GUILayout.Button(LanguageModel.TakeSnapshotButton(_languageSelected), playModeButtons)) {
+                var bytes = CaptureSnapshot(_isTransparent, _width, _height, _camera);
                 if (bytes == null) return;
                 var filename = ScreenshotName(_width.ToString(), _height.ToString());
                 var dInfo = new DirectoryInfo("Assets/Minty Labs/Snapshot Utility/Snapshots");
@@ -363,8 +381,7 @@ public class SnapshotUtility : EditorWindow {
         #endregion
     }
 
-    private static byte[] CaptureSnapshot(bool isTransparent, int width, int height) {
-        var camera = Camera.main;
+    private static byte[] CaptureSnapshot(bool isTransparent, int width, int height, Camera camera) {
         if (camera == null) {
             Debug.LogError(LogPrefix + LanguageModel.NoCameraError(_languageSelected));
             EditorGUILayout.HelpBox(LanguageModel.NoCameraError(_languageSelected), MessageType.Error);
@@ -389,7 +406,7 @@ public class SnapshotUtility : EditorWindow {
             camera.clearFlags = normalCamClearFlags;
             camera.targetTexture = null;
             RenderTexture.active = null;
-            Destroy(transRenderTex);
+            DestroyImmediate(transRenderTex);
             
             return transSnapshot.EncodeToPNG();
         }
@@ -405,7 +422,7 @@ public class SnapshotUtility : EditorWindow {
 
         camera.targetTexture = null;
         RenderTexture.active = null;
-        Destroy(normRenderTex);
+        DestroyImmediate(normRenderTex);
             
         return normSnapshot.EncodeToPNG();
     }
