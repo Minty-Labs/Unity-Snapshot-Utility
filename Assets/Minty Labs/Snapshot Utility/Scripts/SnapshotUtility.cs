@@ -94,7 +94,7 @@ public class SnapshotUtility : EditorWindow {
             
             EditorGUILayout.BeginHorizontal();
             GUILayout.FlexibleSpace();
-            var savedValuesBtn = new GUIStyle(GUI.skin.button) {fixedWidth = 150f};
+            var savedValuesBtn = new GUIStyle(GUI.skin.button) {fixedWidth = _languageSelected == 3 ? 225f : 150f};
             if (GUILayout.Button(LanguageModel.LoadSavedValues(_languageSelected), style: savedValuesBtn)) {
                 var savedValues = File.ReadAllLines(savedValueFile.FullName);
                 if (savedValues == null || savedValues.Length == 0) {
@@ -112,7 +112,7 @@ public class SnapshotUtility : EditorWindow {
                 _height = int.Parse(savedValues[7]);
                 _width = int.Parse(savedValues[8]);
                 var date = savedValues[10].Split(':');
-                Debug.Log(LogPrefix + LanguageModel.LoadedSavedValues(_languageSelected) + date[1].TrimStart(' ') + ":" + date[2] + ":" + date[3]);
+                Debug.Log(LogPrefix + "Loaded Saved Values" + date[1].TrimStart(' ') + ":" + date[2] + ":" + date[3]);
             }
             EditorGUILayout.EndHorizontal();
             
@@ -252,14 +252,14 @@ public class SnapshotUtility : EditorWindow {
                 sb.AppendLine(_width.ToString());
                 sb.Append("\nUpdated: " + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
                 File.WriteAllText(savedValueFile.FullName, sb.ToString());
-                Debug.Log(LogPrefix + LanguageModel.SavedValues(_languageSelected));
+                Debug.Log(LogPrefix + "Saved values to file");
             }
             EditorGUI.EndChangeCheck();
 
             EditorGUILayout.Space(10);
             EditorGUILayout.LabelField($"<size=15><b>{LanguageModel.HowToUse(_languageSelected)}</b></size>");
-            EditorGUILayout.HelpBox($"  1. {LanguageModel.BoxSetup(_languageSelected)}\n" +
-                                    $"  2. {LanguageModel.BoxEnterPlay(_languageSelected)}\n" +
+            EditorGUILayout.HelpBox($"  1. {LanguageModel.AddCamera(_languageSelected)}\n" +
+                                    $"  2. {LanguageModel.BoxSetup(_languageSelected)}\n" +
                                     $"  3. {LanguageModel.BoxSetRes(_languageSelected)}\n" +
                                     $"  4. {LanguageModel.BoxPressButton(_languageSelected)}" +
                                     $"{(_openFileDirectory ? $"\n  5a. {LanguageModel.BoxFileExplorer(_languageSelected)}" : "")}" +
@@ -288,16 +288,16 @@ public class SnapshotUtility : EditorWindow {
                 if (!dInfo.Exists) dInfo.Create();
 
                 File.WriteAllBytes(dInfo.FullName + "\\" + filename, bytes);
-                Debug.Log(LogPrefix + $"{LanguageModel.SavedTo(_languageSelected)} \"{filename}\"");
+                Debug.Log(LogPrefix + $"Saved to \"{filename}\"");
 
                 if (_openFileDirectory) {
                     Process.Start(dInfo.FullName);
-                    Debug.Log(LogPrefix + $"{LanguageModel.OpenedIn(_languageSelected)} \"{filename}\"");
+                    Debug.Log(LogPrefix + $"Opening \"{dInfo.FullName}\"");
                 }
 
                 if (_openInDefaultImageViewer) {
                     Application.OpenURL("file://" + dInfo.FullName + "\\" + filename);
-                    Debug.Log(LogPrefix + LanguageModel.OpenInViewer(_languageSelected));
+                    Debug.Log(LogPrefix + $"Opening \"{filename}\"");
                 }
             }
 

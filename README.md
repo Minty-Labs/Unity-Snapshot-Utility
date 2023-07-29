@@ -21,8 +21,30 @@
 </ul>
 
 <h1>Languages</h1>
-<p>Currently, this tool only supports English. If you would like to help translate this tool (with a language selection dropdown), please head to <a href="https://crowdin.com/project/unity-snapshot-utility/invite?h=71549c4b8a35fa43f2b93971d2c12dec1778145" target="_blank">Crowdin to help out</a>.<br>
-<i>Basic names will be added to a section in the about page of the utility.</i>
+<p>
+  <ul>
+    <li>English
+      <ul>
+        <li>Lily</li>
+      </ul>
+    </li>
+    <li>日本
+      <ul>
+        <li>sudo (須藤)</li>
+        <li>Kati (カティ)</li>
+      </ul>
+    </li>
+    <li>한국인
+      <ul>
+        <li>SweetDogButter</li>
+      </ul>
+    </li>
+    <li>Русский
+      <ul>
+        <li>FulmurX</li>
+      </ul>
+    </li>
+  </ul>
 </p>
 
 <h1>Updates</h1>
