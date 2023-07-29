@@ -5,10 +5,11 @@ using System.Net;
 using System.Text;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.UIElements;
 using Debug = UnityEngine.Debug;
 
 public class SnapshotUtility : EditorWindow {
-    private const string Version = "1.0.0";
+    private const string Version = "1.1.0";
     private const string SaveFileVersion = "2";
     private const string LogPrefix = "[<color=#9fffe3>MintySnapshot Utility</color>] ";
     private const string FakeUserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:102.0) Gecko/20100101 Firefox/102.0";
@@ -40,7 +41,7 @@ public class SnapshotUtility : EditorWindow {
         CheckForUpdate();
         var eWindow = GetWindow<SnapshotUtility>();
         eWindow.titleContent = new GUIContent("Snapshot Utility");
-        eWindow.minSize = new Vector2(500, 550);
+        eWindow.minSize = new Vector2(500, 650);
         eWindow.autoRepaintOnSceneChange = true;
         eWindow.Show();
 
@@ -322,8 +323,8 @@ public class SnapshotUtility : EditorWindow {
             Application.OpenURL("https://mintylabs.dev/");
         if (GUILayout.Button("Booth"))
             Application.OpenURL("https://mintylabs.booth.pm/");
-        if (GUILayout.Button("Twitter")) 
-            Application.OpenURL("https://twitter.com/MintLiIy");
+        if (GUILayout.Button("X (Twitter)")) 
+            Application.OpenURL("https://x.com/MintLiIy");
         if (GUILayout.Button("GitHub")) 
             Application.OpenURL("https://github.com/MintLily");
         if (GUILayout.Button("Ko-fi (Donate)")) 
