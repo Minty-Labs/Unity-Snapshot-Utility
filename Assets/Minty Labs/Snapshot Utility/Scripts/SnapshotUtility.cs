@@ -9,6 +9,7 @@ using Debug = UnityEngine.Debug;
 
 public class SnapshotUtility : EditorWindow {
     private const string Version = "1.0.0";
+    private const string SaveFileVersion = "2";
     private const string LogPrefix = "[<color=#9fffe3>MintySnapshot Utility</color>] ";
     private const string FakeUserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:102.0) Gecko/20100101 Firefox/102.0";
     private static bool _updateAvailable;
@@ -113,13 +114,25 @@ public class SnapshotUtility : EditorWindow {
                     EditorGUILayout.HelpBox(LanguageModel.SaveFileIssue(_languageSelected), MessageType.Error);
                     return;
                 }
+
+                var versionLine = savedValues[11];
+                if (!string.IsNullOrWhiteSpace(versionLine)) {
+                    Debug.LogError(LogPrefix + LanguageModel.SaveFileIssue(_languageSelected));
+                    EditorGUILayout.HelpBox(LanguageModel.SaveFileIssue(_languageSelected), MessageType.Error);
+
+                    if (versionLine.Contains(SaveFileVersion)) return;
+                    Debug.LogError(LogPrefix + LanguageModel.OldSaveFile(_languageSelected));
+                    EditorGUILayout.HelpBox(LanguageModel.OldSaveFile(_languageSelected), MessageType.Error);
+                    return;
+                }
+                
                 _isTransparent = bool.Parse(savedValues[0]);
                 _openFileDirectory = bool.Parse(savedValues[1]);
                 _openInDefaultImageViewer = bool.Parse(savedValues[2]);
                 _resolutionSelected = int.Parse(savedValues[3]);
                 _standardResSelected = int.Parse(savedValues[4]);
-                _vrchatResSelected = int.Parse(savedValues[5]);
-                _chiloutvrResSelected = int.Parse(savedValues[6]);
+                _resolutionMultiplier = int.Parse(savedValues[5]);
+                _cameraNameFromScene = savedValues[6];
                 _height = int.Parse(savedValues[7]);
                 _width = int.Parse(savedValues[8]);
                 var date = savedValues[10].Split(':');
@@ -250,8 +263,8 @@ public class SnapshotUtility : EditorWindow {
                 _openInDefaultImageViewer = false;
                 _resolutionSelected = 1;
                 _standardResSelected = 2;
-                _vrchatResSelected = 0;
-                _chiloutvrResSelected = 0;
+                _resolutionMultiplier = 1;
+                _cameraNameFromScene = "null";
                 _height = 1920;
                 _width = 1080;
             }
@@ -264,11 +277,12 @@ public class SnapshotUtility : EditorWindow {
                 sb.AppendLine(_openInDefaultImageViewer.ToString());
                 sb.AppendLine(_resolutionSelected.ToString());
                 sb.AppendLine(_standardResSelected.ToString());
-                sb.AppendLine(_vrchatResSelected.ToString());
-                sb.AppendLine(_chiloutvrResSelected.ToString());
+                sb.AppendLine(_resolutionMultiplier.ToString());
+                sb.AppendLine(_cameraNameFromScene);
                 sb.AppendLine(_height.ToString());
                 sb.AppendLine(_width.ToString());
-                sb.Append("\nUpdated: " + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
+                sb.AppendLine("\nUpdated: " + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
+                sb.Append("Version: " + SaveFileVersion);
                 File.WriteAllText(savedValueFile.FullName, sb.ToString());
                 Debug.Log(LogPrefix + "Saved values to file");
             }
